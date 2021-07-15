@@ -2868,7 +2868,7 @@ function mergeObject(target, src) {
         target[opt] = src[opt];
     });
 }
-function jsQR(data, width, height, providedOptions = {}) {
+function _jsQR(data, width, height, providedOptions = {}) {
     const options = Object.create(null);
     mergeObject(options, defaultOptions);
     mergeObject(options, providedOptions);
@@ -2881,7 +2881,70 @@ function jsQR(data, width, height, providedOptions = {}) {
     }
     return result;
 }
-jsQR.default = jsQR;
 
+// embedQR extension to jsQR by Michael Hammes published under Apache-2.0 License like original library
+// Added asynchronous processing as well as scaling and rotating to suit high resolution smartphone camera images
+
+function imgLoad(imgurl) {
+	return new Promise((resolve, reject) => { try {
+		const rimg = new Image();
+		rimg.addEventListener('load', () => { resolve(rimg); });
+		rimg.addEventListener('error', () => { reject('Failed to load.'); });
+		rimg.src = URL.createObjectURL(imgurl);
+	} catch (ex) { reject(ex); } });
+}
+
+function imgDraw(img, tscale, trot) {
+	return new Promise((resolve, reject) => { try {
+		const can = document.createElement('canvas');
+		const con = can.getContext('2d');
+		const twidth = img.naturalWidth * tscale;
+		const theight = img.naturalHeight * tscale;
+		con.clearRect(0, 0, can.width, can.height);
+		can.width = twidth;
+		can.height = theight;
+		if (!trot) {
+			con.drawImage(img, 0, 0, can.width, can.height);
+		} else {
+			con.translate(twidth / 2, theight / 2);
+			con.rotate(trot * 90 * Math.PI / 180);
+			con.drawImage(img, -(twidth/2), -(theight/2), twidth, theight);
+			con.rotate(-(trot * 90 * Math.PI / 180));
+			con.translate(-(twidth / 2), -(theight / 2));
+		}
+		resolve(can);
+	} catch (ex) { reject(ex); } });
+}
+
+// Grayscale weight manipulation for YUV -> RGB conversion taken from
+// https://github.com/nimiq/qr-scanner (having same ancestor as this library)
+// Follows https://en.wikipedia.org/wiki/YUV#Full_swing_for_BT.601 )
+function imgParse(ct) {
+	const ctx = ct.getContext('2d');
+	return new Promise((resolve, reject) => { try {
+		const data = ctx.getImageData(0, 0, ct.width, ct.height);
+		const result = jsQR(data['data'], data['width'], data['height'], { inversionAttempts: 'dontInvert',	greyScaleWeights: { red: 77, green: 150, blue: 29, useIntegerApproximation: true, } });
+		(result) ? resolve(result.data) : resolve(null);
+	} catch (ex) { reject(ex); } });
+}
+
+async function jsQR(newImg) {
+	try {
+		const img = await imgLoad(newImg);	
+
+		let imgscale = 1;
+		const scaletarget = 600;
+		if (Math.max(img.naturalWidth, img.naturalHeight) > scaletarget) { imgscale = scaletarget / Math.max(img.naturalWidth, img.naturalHeight); }
+		
+		for (let i=0; i < 4; i++) {
+			const can = await imgDraw(img, imgscale, i);
+			const result = await imgParse(can);
+			if (result) { return result; }
+		}
+	} catch (ex) {
+		throw(ex);
+	} finally {
+		throw('');
+	}
+}
 export default jsQR;
-//# sourceMappingURL=jsQR.js.map
