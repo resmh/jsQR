@@ -2923,7 +2923,7 @@ function imgParse(ct) {
 	const ctx = ct.getContext('2d');
 	return new Promise((resolve, reject) => { try {
 		const data = ctx.getImageData(0, 0, ct.width, ct.height);
-		const result = jsQR(data['data'], data['width'], data['height'], { inversionAttempts: 'dontInvert',	greyScaleWeights: { red: 77, green: 150, blue: 29, useIntegerApproximation: true, } });
+		const result = _jsQR(data['data'], data['width'], data['height'], { inversionAttempts: 'dontInvert',	greyScaleWeights: { red: 77, green: 150, blue: 29, useIntegerApproximation: true, } });
 		(result) ? resolve(result.data) : resolve(null);
 	} catch (ex) { reject(ex); } });
 }
