@@ -2943,8 +2943,7 @@ async function jsQR(newImg) {
 		}
 	} catch (ex) {
 		throw(ex);
-	} finally {
-		throw('');
 	}
+	throw('');
 }
 export default jsQR;
