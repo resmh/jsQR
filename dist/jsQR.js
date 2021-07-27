@@ -601,7 +601,7 @@ class GenericGF {
     }
     inverse(a) {
         if (a === 0) {
-            throw new Error("Can't invert 0");
+            throw new Error("Cant invert 0");
         }
         return this.expTable[this.size - this.logTable[a] - 1];
     }
@@ -618,7 +618,7 @@ class GenericGF {
     }
     log(a) {
         if (a === 0) {
-            throw new Error("Can't take log(0)");
+            throw new Error("Cant take log(0)");
         }
         return this.logTable[a];
     }
