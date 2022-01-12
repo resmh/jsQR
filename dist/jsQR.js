@@ -36,7 +36,7 @@ class Matrix {
         this.width = width;
         const bufferSize = width * height;
         if (buffer && buffer.length !== bufferSize) {
-            throw new Error("Wrong buffer size");
+            throw new Error('Wrong buffer size');
         }
         this.data = buffer || new Uint8ClampedArray(bufferSize);
     }
@@ -50,7 +50,7 @@ class Matrix {
 function binarize(data, width, height, returnInverted, greyscaleWeights, canOverwriteImage) {
     const pixelCount = width * height;
     if (data.length !== pixelCount * 4) {
-        throw new Error("Malformed data passed to binarizer.");
+        throw new Error('Malformed data passed to binarizer.');
     }
     // assign the greyscale and binary image within the rgba buffer as the rgba image will not be needed after conversion
     let bufferOffset = 0;
@@ -122,7 +122,7 @@ function binarize(data, width, height, returnInverted, greyscaleWeights, canOver
                 // Default the blackpoint for these blocks to be half the min - effectively white them out
                 average = min / 2;
                 if (verticalRegion > 0 && hortizontalRegion > 0) {
-                    // Correct the "white background" assumption for blocks that have neighbors by comparing
+                    // Correct the 'white background' assumption for blocks that have neighbors by comparing
                     // the pixels in this block to the previously calculated black points. This is based on
                     // the fact that dark barcode symbology is always surrounded by some amount of light
                     // background for which reasonable black point estimates were made. The bp estimated at
@@ -197,7 +197,7 @@ class BitStream {
     }
     readBits(numBits) {
         if (numBits < 1 || numBits > 32 || numBits > this.available()) {
-            throw new Error("Cannot read " + numBits.toString() + " bits");
+            throw new Error('Cannot read ' + numBits.toString() + ' bits');
         }
         let result = 0;
         // First, read remainder from current byte
@@ -239,34 +239,34 @@ class BitStream {
 // tslint:disable:no-bitwise
 var Mode;
 (function (Mode) {
-    Mode["Numeric"] = "numeric";
-    Mode["Alphanumeric"] = "alphanumeric";
-    Mode["Byte"] = "byte";
-    Mode["Kanji"] = "kanji";
-    Mode["ECI"] = "eci";
+    Mode['Numeric'] = 'numeric';
+    Mode['Alphanumeric'] = 'alphanumeric';
+    Mode['Byte'] = 'byte';
+    Mode['Kanji'] = 'kanji';
+    Mode['ECI'] = 'eci';
 })(Mode || (Mode = {}));
 var ModeByte;
 (function (ModeByte) {
-    ModeByte[ModeByte["Terminator"] = 0] = "Terminator";
-    ModeByte[ModeByte["Numeric"] = 1] = "Numeric";
-    ModeByte[ModeByte["Alphanumeric"] = 2] = "Alphanumeric";
-    ModeByte[ModeByte["Byte"] = 4] = "Byte";
-    ModeByte[ModeByte["Kanji"] = 8] = "Kanji";
-    ModeByte[ModeByte["ECI"] = 7] = "ECI";
+    ModeByte[ModeByte['Terminator'] = 0] = 'Terminator';
+    ModeByte[ModeByte['Numeric'] = 1] = 'Numeric';
+    ModeByte[ModeByte['Alphanumeric'] = 2] = 'Alphanumeric';
+    ModeByte[ModeByte['Byte'] = 4] = 'Byte';
+    ModeByte[ModeByte['Kanji'] = 8] = 'Kanji';
+    ModeByte[ModeByte['ECI'] = 7] = 'ECI';
     // StructuredAppend = 0x3,
     // FNC1FirstPosition = 0x5,
     // FNC1SecondPosition = 0x9,
 })(ModeByte || (ModeByte = {}));
 function decodeNumeric(stream, size) {
     const bytes = [];
-    let text = "";
+    let text = '';
     const characterCountSize = [10, 12, 14][size];
     let length = stream.readBits(characterCountSize);
     // Read digits in groups of 3
     while (length >= 3) {
         const num = stream.readBits(10);
         if (num >= 1000) {
-            throw new Error("Invalid numeric value above 999");
+            throw new Error('Invalid numeric value above 999');
         }
         const a = Math.floor(num / 100);
         const b = Math.floor(num / 10) % 10;
@@ -275,11 +275,11 @@ function decodeNumeric(stream, size) {
         text += a.toString() + b.toString() + c.toString();
         length -= 3;
     }
-    // If the number of digits aren't a multiple of 3, the remaining digits are special cased.
+    // If the number of digits arent a multiple of 3, the remaining digits are special cased.
     if (length === 2) {
         const num = stream.readBits(7);
         if (num >= 100) {
-            throw new Error("Invalid numeric value above 99");
+            throw new Error('Invalid numeric value above 99');
         }
         const a = Math.floor(num / 10);
         const b = num % 10;
@@ -289,7 +289,7 @@ function decodeNumeric(stream, size) {
     else if (length === 1) {
         const num = stream.readBits(4);
         if (num >= 10) {
-            throw new Error("Invalid numeric value above 9");
+            throw new Error('Invalid numeric value above 9');
         }
         bytes.push(48 + num);
         text += num.toString();
@@ -297,15 +297,15 @@ function decodeNumeric(stream, size) {
     return { bytes, text };
 }
 const AlphanumericCharacterCodes = [
-    "0", "1", "2", "3", "4", "5", "6", "7", "8",
-    "9", "A", "B", "C", "D", "E", "F", "G", "H",
-    "I", "J", "K", "L", "M", "N", "O", "P", "Q",
-    "R", "S", "T", "U", "V", "W", "X", "Y", "Z",
-    " ", "$", "%", "*", "+", "-", ".", "/", ":",
+    '0', '1', '2', '3', '4', '5', '6', '7', '8',
+    '9', 'A', 'B', 'C', 'D', 'E', 'F', 'G', 'H',
+    'I', 'J', 'K', 'L', 'M', 'N', 'O', 'P', 'Q',
+    'R', 'S', 'T', 'U', 'V', 'W', 'X', 'Y', 'Z',
+    ' ', '$', '%', '*', '+', '-', '.', '/', ':',
 ];
 function decodeAlphanumeric(stream, size) {
     const bytes = [];
-    let text = "";
+    let text = '';
     const characterCountSize = [9, 11, 13][size];
     let length = stream.readBits(characterCountSize);
     while (length >= 2) {
@@ -325,7 +325,7 @@ function decodeAlphanumeric(stream, size) {
 }
 function decodeByte(stream, size) {
     const bytes = [];
-    let text = "";
+    let text = '';
     const characterCountSize = [8, 16, 16][size];
     const length = stream.readBits(characterCountSize);
     for (let i = 0; i < length; i++) {
@@ -333,7 +333,7 @@ function decodeByte(stream, size) {
         bytes.push(b);
     }
     try {
-        text += decodeURIComponent(bytes.map(b => `%${("0" + b.toString(16)).substr(-2)}`).join(""));
+        text += decodeURIComponent(bytes.map(b => `%${('0' + b.toString(16)).substr(-2)}`).join(''));
     }
     catch (_a) {
         // failed to decode
@@ -355,15 +355,15 @@ function decodeKanji(stream, size) {
         }
         bytes.push(c >> 8, c & 0xFF);
     }
-    const text = new TextDecoder("shift-jis").decode(Uint8Array.from(bytes));
+    const text = new TextDecoder('shift-jis').decode(Uint8Array.from(bytes));
     return { bytes, text };
 }
 function decode(data, version) {
     const stream = new BitStream(data);
-    // There are 3 'sizes' based on the version. 1-9 is small (0), 10-26 is medium (1) and 27-40 is large (2).
+    // There are 3 sizes based on the version. 1-9 is small (0), 10-26 is medium (1) and 27-40 is large (2).
     const size = version <= 9 ? 0 : version <= 26 ? 1 : 2;
     const result = {
-        text: "",
+        text: '',
         bytes: [],
         chunks: [],
     };
@@ -447,12 +447,12 @@ function decode(data, version) {
 class GenericGFPoly {
     constructor(field, coefficients) {
         if (coefficients.length === 0) {
-            throw new Error("No coefficients.");
+            throw new Error('No coefficients.');
         }
         this.field = field;
         const coefficientsLength = coefficients.length;
         if (coefficientsLength > 1 && coefficients[0] === 0) {
-            // Leading term must be non-zero for anything except the constant polynomial "0"
+            // Leading term must be non-zero for anything except the constant polynomial '0'
             let firstNonZero = 1;
             while (firstNonZero < coefficientsLength && coefficients[firstNonZero] === 0) {
                 firstNonZero++;
@@ -535,7 +535,7 @@ class GenericGFPoly {
     }
     multiplyByMonomial(degree, coefficient) {
         if (degree < 0) {
-            throw new Error("Invalid degree less than 0");
+            throw new Error('Invalid degree less than 0');
         }
         if (coefficient === 0) {
             return this.field.zero;
@@ -601,13 +601,13 @@ class GenericGF {
     }
     inverse(a) {
         if (a === 0) {
-            throw new Error("Cant invert 0");
+            throw new Error('Cant invert 0');
         }
         return this.expTable[this.size - this.logTable[a] - 1];
     }
     buildMonomial(degree, coefficient) {
         if (degree < 0) {
-            throw new Error("Invalid monomial degree less than 0");
+            throw new Error('Invalid monomial degree less than 0');
         }
         if (coefficient === 0) {
             return this.zero;
@@ -618,7 +618,7 @@ class GenericGF {
     }
     log(a) {
         if (a === 0) {
-            throw new Error("Cant take log(0)");
+            throw new Error('Cant take log(0)');
         }
         return this.logTable[a];
     }
@@ -628,7 +628,7 @@ class GenericGF {
 }
 
 function runEuclideanAlgorithm(field, a, b, R) {
-    // Assume a's degree is >= b's
+    // Assume as degree is >= bs
     if (a.degree() < b.degree()) {
         [a, b] = [b, a];
     }
@@ -636,7 +636,7 @@ function runEuclideanAlgorithm(field, a, b, R) {
     let r = b;
     let tLast = field.zero;
     let t = field.one;
-    // Run Euclidean algorithm until r's degree is less than R/2
+    // Run Euclidean algorithm until rs degree is less than R/2
     while (r.degree() >= R / 2) {
         const rLastLast = rLast;
         const tLastLast = tLast;
@@ -670,7 +670,7 @@ function runEuclideanAlgorithm(field, a, b, R) {
     return [t.multiply(inverse), r.multiply(inverse)];
 }
 function findErrorLocations(field, errorLocator) {
-    // This is a direct application of Chien's search
+    // This is a direct application of Chiens search
     const numErrors = errorLocator.degree();
     if (numErrors === 1) {
         return [errorLocator.getCoefficient(1)];
@@ -689,7 +689,7 @@ function findErrorLocations(field, errorLocator) {
     return result;
 }
 function findErrorMagnitudes(field, errorEvaluator, errorLocations) {
-    // This is directly applying Forney's Formula
+    // This is directly applying Forneys Formula
     const s = errorLocations.length;
     const result = new Array(s);
     for (let i = 0; i < s; i++) {
@@ -2264,7 +2264,7 @@ function getDataBlocks(codewords, version, ecLevel) {
         }
     });
     // In some cases the QR code will be malformed enough that we pull off more or less than we should.
-    // If we pull off less there's nothing we can do.
+    // If we pull off less theres nothing we can do.
     // If we pull off more we can safely truncate
     if (codewords.length < totalCodewords) {
         return null;
@@ -2335,7 +2335,7 @@ function decode$2(matrix) {
     if (result) {
         return result;
     }
-    // Decoding didn't work, try mirroring the QR across the topLeft -> bottomRight line.
+    // Decoding didnt work, try mirroring the QR across the topLeft -> bottomRight line.
     for (let x = 0; x < matrix.width; x++) {
         for (let y = x + 1; y < matrix.height; y++) {
             if (matrix.get(x, y) !== matrix.get(y, x)) {
@@ -2465,8 +2465,8 @@ function reorderFinderPatterns(pattern1, pattern2, pattern3) {
         [bottomLeft, topLeft, topRight] = [pattern1, pattern3, pattern2];
     }
     // Use cross product to figure out whether bottomLeft (A) and topRight (C) are correct or flipped in relation to topLeft (B)
-    // This asks whether BC x BA has a positive z component, which is the arrangement we want. If it's negative, then
-    // we've got it flipped around and should swap topRight and bottomLeft.
+    // This asks whether BC x BA has a positive z component, which is the arrangement we want. If its negative, then
+    // weve got it flipped around and should swap topRight and bottomLeft.
     if (((topRight.x - topLeft.x) * (bottomLeft.y - topLeft.y)) - ((topRight.y - topLeft.y) * (bottomLeft.x - topLeft.x)) < 0) {
         [bottomLeft, topRight] = [topRight, bottomLeft];
     }
@@ -2479,7 +2479,7 @@ function computeDimension(topLeft, topRight, bottomLeft, matrix) {
         sum(countBlackWhiteRun(bottomLeft, topLeft, matrix, 5)) / 7 +
         sum(countBlackWhiteRun(topRight, topLeft, matrix, 5)) / 7) / 4;
     if (moduleSize < 1) {
-        throw new Error("Invalid module size");
+        throw new Error('Invalid module size');
     }
     const topDimension = Math.round(distance(topLeft, topRight) / moduleSize);
     const sideDimension = Math.round(distance(topLeft, bottomLeft) / moduleSize);
@@ -2496,7 +2496,7 @@ function computeDimension(topLeft, topRight, bottomLeft, matrix) {
 }
 // Takes an origin point and an end point and counts the sizes of the black white run from the origin towards the end point.
 // Returns an array of elements, representing the pixel size of the black white run.
-// Uses a variant of http://en.wikipedia.org/wiki/Bresenham's_line_algorithm
+// Uses a variant of http://en.wikipedia.org/wiki/Bresenhams_line_algorithm
 function countBlackWhiteRunTowardsPoint(origin, end, matrix, length) {
     const switchPoints = [{ x: Math.floor(origin.x), y: Math.floor(origin.y) }];
     const steep = Math.abs(end.y - origin.y) > Math.abs(end.x - origin.x);
@@ -2564,10 +2564,10 @@ function countBlackWhiteRun(origin, end, matrix, length) {
     const run = end.x - origin.x;
     const towardsEnd = countBlackWhiteRunTowardsPoint(origin, end, matrix, Math.ceil(length / 2));
     const awayFromEnd = countBlackWhiteRunTowardsPoint(origin, { x: origin.x - run, y: origin.y - rise }, matrix, Math.ceil(length / 2));
-    const middleValue = towardsEnd.shift() + awayFromEnd.shift() - 1; // Substract one so we don't double count a pixel
+    const middleValue = towardsEnd.shift() + awayFromEnd.shift() - 1; // Substract one so we dont double count a pixel
     return awayFromEnd.concat(middleValue).concat(...towardsEnd);
 }
-// Takes in a black white run and an array of expected ratios. Returns the average size of the run as well as the "error" -
+// Takes in a black white run and an array of expected ratios. Returns the average size of the run as well as the 'error' -
 // that is the amount the run diverges from the expected ratio
 function scoreBlackWhiteRun(sequence, ratios) {
     const averageSize = sum(sequence) / sum(ratios);
@@ -2760,7 +2760,7 @@ function locate(matrix) {
     }
     // We normally use the center of the quads as the location of the tracking points, which is optimal for most cases and will account
     // for a skew in the image. However, In some cases, a slight skew might not be real and instead be caused by image compression
-    // errors and/or low resolution. For those cases, we'd be better off centering the point exactly in the middle of the black area. We
+    // errors and/or low resolution. For those cases, wed be better off centering the point exactly in the middle of the black area. We
     // compute and return the location data for the naively centered points as it is little additional work and allows for multiple
     // attempts at decoding harder images.
     const midTopRight = recenterLocation(matrix, topRight);
@@ -2782,8 +2782,8 @@ function locate(matrix) {
     return result;
 }
 function findAlignmentPattern(matrix, alignmentPatternQuads, topRight, topLeft, bottomLeft) {
-    // Now that we've found the three finder patterns we can determine the blockSize and the size of the QR code.
-    // We'll use these to help find the alignment pattern but also later when we do the extraction.
+    // Now that weve found the three finder patterns we can determine the blockSize and the size of the QR code.
+    // Well use these to help find the alignment pattern but also later when we do the extraction.
     let dimension;
     let moduleSize;
     try {
@@ -2818,7 +2818,7 @@ function findAlignmentPattern(matrix, alignmentPatternQuads, topRight, topLeft, 
     })
         .filter(v => !!v)
         .sort((a, b) => a.score - b.score);
-    // If there are less than 15 modules between finder patterns it's a version 1 QR code and as such has no alignmemnt pattern
+    // If there are less than 15 modules between finder patterns its a version 1 QR code and as such has no alignmemnt pattern
     // so we can only use our best guess.
     const alignmentPattern = modulesBetweenFinderPatterns >= 15 && alignmentPatterns.length ? alignmentPatterns[0] : expectedAlignmentPattern;
     return { alignmentPattern, dimension };
@@ -2854,7 +2854,7 @@ function scan(matrix) {
     return null;
 }
 const defaultOptions = {
-    inversionAttempts: "attemptBoth",
+    inversionAttempts: 'attemptBoth',
     greyScaleWeights: {
         red: 0.2126,
         green: 0.7152,
@@ -2872,11 +2872,11 @@ function _jsQR(data, width, height, providedOptions = {}) {
     const options = Object.create(null);
     mergeObject(options, defaultOptions);
     mergeObject(options, providedOptions);
-    const tryInvertedFirst = options.inversionAttempts === "onlyInvert" || options.inversionAttempts === "invertFirst";
-    const shouldInvert = options.inversionAttempts === "attemptBoth" || tryInvertedFirst;
+    const tryInvertedFirst = options.inversionAttempts === 'onlyInvert' || options.inversionAttempts === 'invertFirst';
+    const shouldInvert = options.inversionAttempts === 'attemptBoth' || tryInvertedFirst;
     const { binarized, inverted } = binarize(data, width, height, shouldInvert, options.greyScaleWeights, options.canOverwriteImage);
     let result = scan(tryInvertedFirst ? inverted : binarized);
-    if (!result && (options.inversionAttempts === "attemptBoth" || options.inversionAttempts === "invertFirst")) {
+    if (!result && (options.inversionAttempts === 'attemptBoth' || options.inversionAttempts === 'invertFirst')) {
         result = scan(tryInvertedFirst ? binarized : inverted);
     }
     return result;
